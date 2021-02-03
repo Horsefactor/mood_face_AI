@@ -8,6 +8,12 @@ eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 cap = cv2.VideoCapture(0)
 # To use a video file as input
 # cap = cv2.VideoCapture('filename.mp4')
+def create_face_dic():
+    print("ok")
+
+create_face_dic()
+
+
 
 while True:
     # Read the frame
