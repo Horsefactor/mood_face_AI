@@ -25,22 +25,20 @@ def create_face_dic():
     list = []
     dire = 'emojis/'
     emojisName = os.listdir(dire)
-    # print(emojisName)
+    print(emojisName)
     for name in emojisName:
         path = dire + name
         img = cv2.imread(path)
-        dict[name[:-4]] = 0
+        dict[name[:-4]] = img
         emojiList.append(img)
+
 
         # cv2.imshow('img', img)
         # cv2.waitKey(0)
-    dict['grinning_face'] = []
+
     # for img in emojiList:
     #     cv2.imshow('img', img)
     #     cv2.waitKey(0)
-
-def takeSecond(elem):
-    return elem[1]
 
 def get_emoji_mood(roi_color,roi_gray):
 
@@ -85,11 +83,10 @@ def apply_emoji(roi_color,emoji, incl):
     img2gray = cv2.warpAffine(img2gray, rot, (img2gray.shape[0], img2gray.shape[1]))
     emoji_sized = cv2.warpAffine(emoji_sized, rot, (img2gray.shape[0], img2gray.shape[1]))
 
-    ret, mask = cv2.threshold(img2gray, 50, 255, cv2.THRESH_BINARY)
+
+    ret, mask = cv2.threshold(img2gray, 10, 255, cv2.THRESH_BINARY)
     mask_inv = cv2.bitwise_not(mask)
 
-    # cv2.imshow('img', mask_inv)
-    # cv2.waitKey(0)
 
     img1_bg = cv2.bitwise_and(roi_color, roi_color,mask = mask_inv)
     emoji_fg = cv2.bitwise_and(emoji_sized, emoji_sized , mask=mask)
@@ -114,7 +111,7 @@ for (x, y, w, h) in faces:
     dst = apply_emoji(roi_color,emoji, incl)
     img[y:y + h, x:x + w] = dst
 
-    eyes = eye_cascade.detectMultiScale(roi_gray)
+    eyes = eye_tree_cascade.detectMultiScale(roi_gray)
     eyes_pos = []
 
     for (ex, ey, ew, eh) in eyes:
