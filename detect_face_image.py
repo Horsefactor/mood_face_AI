@@ -7,7 +7,7 @@ eye_cascade = cv2.CascadeClassifier('classifiers/haarcascade_eye.xml')
 eye_tree_cascade = cv2.CascadeClassifier('classifiers/haarcascade_eye_tree_eyeglasses.xml')
 
 # Read the input image
-img = cv2.imread('test.jpg')
+img = cv2.imread('sample/family.jpg')
 
 
 # Convert into grayscale
@@ -111,7 +111,7 @@ for (x, y, w, h) in faces:
     dst = apply_emoji(roi_color,emoji, incl)
     img[y:y + h, x:x + w] = dst
 
-    eyes = eye_tree_cascade.detectMultiScale(roi_gray)
+    eyes = eye_cascade.detectMultiScale(roi_gray)
     eyes_pos = []
 
     for (ex, ey, ew, eh) in eyes:
