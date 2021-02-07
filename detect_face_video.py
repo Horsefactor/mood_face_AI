@@ -76,7 +76,7 @@ emojiList = []
 
 create_face_dic()
 
-faceDetectInterval = 0.5
+faceDetectInterval = 0.05
 
 timer0 = 0
 timerLoop = time.time()
@@ -91,7 +91,7 @@ eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml
 cap = cv2.VideoCapture(0 + cv2.CAP_DSHOW)
 
 if not cap.isOpened():
-    cap = cv2.VideoCapture("sampleVideo/solo0.mp4")
+    cap = cv2.VideoCapture("sampleVideo/group0.mp4")
 if not cap.isOpened():
     raise IOError("Cannot open webcam")
 

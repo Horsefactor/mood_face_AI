@@ -23,7 +23,11 @@ class ClientThread(threading.Thread):
 
         while True:
             print("detect faces")
-            self.facePos = face_cascade.detectMultiScale(self.img, 1.1, 4)
+            self.facePos = face_cascade.detectMultiScale(self.img, 1.1, 10)
+
+
             time.sleep(self.interval)
         pass
 
+    def applyMask(self):
+        return 0
