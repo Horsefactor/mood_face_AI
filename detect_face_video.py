@@ -76,11 +76,11 @@ emojiList = []
 
 create_face_dic()
 
-faceDetectInterval = 0.05
+faceDetectInterval = 0.1
 
 timer0 = 0
 timerLoop = time.time()
-framerate = 40
+framerate =30
 print_lock = threading.Lock()
 
 # Load the cascade
@@ -100,47 +100,57 @@ if not cap.isOpened():
 _, img = cap.read()
 a = np.zeros(shape=img.shape, dtype=np.int8)
 
-threadFace = threadHead.ClientThread(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), faceDetectInterval)
+threadFace = threadHead.ClientThread(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), faceDetectInterval, cap, framerate)
 threadFace.start()
 
 
 while True:
-    if time.time() - timerLoop > 1/framerate:
-        timerLoop = time.time()
-        # Read the frame
+    try:
+        i = 0
+        if time.time() - timerLoop > 1/framerate:
+            timerLoop = time.time()
+            # Read the frame
+            _, img = cap.read()
 
-        _, img = cap.read()
-        #result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
+            #result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
 
-        # Convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # Detect the faces
+            # Convert to grayscale
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # Detect the faces
 
 
-        # Draw the rectangle around each face
-        if time.time() - timer0 > faceDetectInterval:
+            # Draw the rectangle around each face
+
+            if time.time() - timer0 > faceDetectInterval:
+                faces = threadFace.facePos
+                threadFace.img = gray
+                timer0 = time.time()
+
+            """
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(img,
+                        result['dominant_emotion'],
+                        (50, 50),
+                        font, 3,
+                        (0, 0, 255),
+                        2,
+                        cv2.LINE_4)    
+            """
             faces = threadFace.facePos
-            threadFace.img = gray
-            timer0 = time.time()
 
-        """
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(img,
-                    result['dominant_emotion'],
-                    (50, 50),
-                    font, 3,
-                    (0, 0, 255),
-                    2,
-                    cv2.LINE_4)    
-        """
-        for (x, y, w, h) in faces:
-            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-        # Display
-        # dst = cv2.add(img, a)
-        cv2.imshow('img', img)
+            for (x, y, w, h) in faces:
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # Display
+            # dst = cv2.add(img, a)
+            cv2.imshow('img', img)
 
-    # Stop if q key is pressed
-    if cv2.waitKey(2) & 0xff == ord('q'):
+
+        # Stop if q key is pressed
+        if cv2.waitKey(2) & 0xff == ord('q'):
+            break
+    except:
+        print("stop")
+        threadFace.stop = True
         break
 
 # Release the VideoCapture object
