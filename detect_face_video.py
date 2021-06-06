@@ -7,6 +7,14 @@ import threading
 import threadHead
 import threadEmotion
 import tensorflow as tf
+import HeadWatcher
+import Head
+
+####
+# LOAD MODELS
+####
+new_model= tf.keras.models.load_model('models/my_model_64p35.h5') #Emotion Model
+emotion_list = ['Angry','Disgust','Fear','Happy','Neutral','Sad','Surprised']
 
 def create_face_dic():
 
@@ -50,9 +58,8 @@ def get_emoji_mood(roi_color,roi_gray):
         incl = -np.arctan(deltaY/deltaX)
     return emojiList[2], incl
 
-new_model= tf.keras.models.load_model('models/my_model_64p35.h5')
 
-emotion_list = ['Angry','Disgust','Fear','Happy','Neutral','Sad','Surprised']
+
 
 def get_emotion(roi_gray):
     final_image = cv2.resize(roi_gray,(224,224))
@@ -101,34 +108,28 @@ create_face_dic()
 #CONSTANTS        #
 ###################
 
-faceDetectInterval = 2
+font = cv2.FONT_HERSHEY_SIMPLEX
+
+faceDetectInterval = 0.25
 timer0 = time.time() #face detection timer
 
 emotionDetectInterval = 0.5
 timer1 = time.time() #emotion detection timer
 timerLoop = time.time()
-framerate =3
+framerate =60
 print_lock = threading.Lock()
 
-# Load the cascade
-# face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-# eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
-# To capture video from webcam.
+####
+#CAPTURE VIDEO
+####
 cap = cv2.VideoCapture(0 + cv2.CAP_DSHOW)
 
 if not cap.isOpened():
-    cap = cv2.VideoCapture("sampleVideo/group0.mp4")
-# if not cap.isOpened():
-#     raise IOError("Cannot open webcam")
+    cap = cv2.VideoCapture("sampleVideo/solo0.mp4")
 
-# To use a video file as input
-# cap = cv2.VideoCapture('filename.mp4')
 _, img = cap.read()
 a = np.zeros(shape=img.shape, dtype=np.int8)
-
-
-
 i=0
 
 
@@ -136,6 +137,7 @@ if __name__ =="__main__":
     threadFace = threadHead.ClientThread(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), faceDetectInterval, cap, framerate)
     threadFace.start()
 
+    watcher = HeadWatcher.HeadWatcherV1()
 
     while True:
 
@@ -160,23 +162,26 @@ if __name__ =="__main__":
                     faces = threadFace.facePos
                     threadFace.img = gray
                     timer0 = time.time()
+                    watcher.load_position(faces)
+                    watcher.verify()
 
-                """
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(img,
-                            result['dominant_emotion'],
-                            (50, 50),
-                            font, 3,
-                            (0, 0, 255),
-                            2,
-                            cv2.LINE_4)    
-                """
                 faces = threadFace.facePos
-                #
-                for (x, y, w, h) in faces:
-                    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 2)
-                    roi_color = img[y:y + h, x:x + w]
-                    print((x, y, x + w, y + h))
+
+                for head in watcher.head_list:
+                    if head.valid:
+                        cv2.rectangle(img, (head.x, head.y), (head.x + head.w, head.y + head.h), (255, 0, 0), 2)
+                        cv2.putText(img,
+                                    'Valid',
+                                    (head.x, head.y),
+                                    font, 1,
+                                    (255, 0, 0),
+                                    2,
+                                    cv2.LINE_4)
+
+                    else:
+                        cv2.rectangle(img, (head.x, head.y), (head.x + head.w, head.y + head.h), (255, 255, 255), 2)
+
+
                 if len(faces)==0:
                     roi_color=img
                 if time.time() - timer1 > emotionDetectInterval:

@@ -19,6 +19,11 @@ class Head(ABC):
         """
         pass
 
+    @abstractmethod
+    def update_pos(self, x,y,w,h) -> None:
+
+        pass
+
 class HeadV1(Head):
 
     def __init__(self,x,y,w,h):
@@ -27,11 +32,21 @@ class HeadV1(Head):
         self.w = w
         self.h = h
         self.size = w*h
-        self.valid = 0
+        self.valid = False
+        self.frames = 0
+        print("head found")
 
     def update(self, headwatcher: HeadWatcher) -> None:
         if self.size < 1000:
             print("ConcreteObserverA: Reacted to the event")
+
+    def update_pos(self, x,y,w,h) -> None:
+
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        pass
 
 
 
