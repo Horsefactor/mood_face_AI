@@ -40,7 +40,7 @@ class ClientThread(threading.Thread):
 
                 if time.time() - self.timer0 > self.interval:
                     self.facePos = face_cascade.detectMultiScale(self.img, 1.1, 10)
-                    print("detect faces")
+                    #print("detect faces")
                     self.timer0 = time.time()
                 else:
                     time.sleep(self.interval/10)

@@ -1,15 +1,17 @@
 import cv2
 import os
 import numpy as np
+import tensorflow as tf
 # Load the cascade
 face_cascade = cv2.CascadeClassifier('classifiers/haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('classifiers/haarcascade_eye.xml')
 eye_tree_cascade = cv2.CascadeClassifier('classifiers/haarcascade_eye_tree_eyeglasses.xml')
+new_model= tf.keras.models.load_model('models/my_model_64p35.h5')
 
 # Read the input image
-img = cv2.imread('sample/family.jpg')
+img = cv2.imread('sample/0/Training_143373.jpg')
 
-
+emotion_list = ['Angry','Disgust','Fear','Happy','Neutral','Sad','Surprised']
 # Convert into grayscale
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -47,7 +49,8 @@ def get_emoji_mood(roi_color,roi_gray):
     eyes_pos = []
     eyes_open = [1,1]  #[l,r]
     incl = 0
-
+    cv2.imshow('img',roi_color)
+    cv2.waitKey(0)
     #print("eyes_pos")
 
     eyes = sorted(eyes,key=lambda eyes: eyes[1])
@@ -57,8 +60,8 @@ def get_emoji_mood(roi_color,roi_gray):
 
 
         cv2.rectangle(roi_color, (int(ex + ew/2), int(ey + eh/2)), (ex + ew, ey + eh), (0, 255, 0), 2)
-        cv2.imshow('img',roi_color)
-        cv2.waitKey(0)
+        #cv2.imshow('img',roi_color)
+        #cv2.waitKey(0)
 
     if len(eyes_pos) == 2:
         deltaY = eyes_pos[1][1]-eyes_pos[0][1]
@@ -72,6 +75,19 @@ def get_emoji_mood(roi_color,roi_gray):
     # print(eyes_pos)
     # print("---")
     return emojiList[2] , incl
+
+def get_emotion(roi_gray):
+
+    final_image = cv2.resize(roi_gray,(224,224))
+    # cv2.imshow('img', final_image)
+    # cv2.waitKey(0)
+    final_image = np.expand_dims(final_image,axis=0)
+
+    final_image=final_image/255.0
+
+    Prediction = new_model.predict(final_image)
+    print(emotion_list[np.argmax(Prediction)])
+    return np.argmax(Prediction)
 
 def apply_emoji(roi_color,emoji, incl):
 
@@ -96,34 +112,54 @@ def apply_emoji(roi_color,emoji, incl):
     return dst
 
 
-create_face_dic()
+# create_face_dic()
 
-for (x, y, w, h) in faces:
+# for (x, y, w, h) in faces:
+#
+#     img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+#     roi_gray = gray[y:y + h, x:x + w]
+#     roi_color = img[y:y + h, x:x + w]
+#     print("looking")
+#
+#     get_emotion(roi_color)
+#     cv2.imshow('img', img)
+#     cv2.waitKey(0)
+#     emoji, incl= get_emoji_mood(roi_color,roi_gray)
 
-    img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-    roi_gray = gray[y:y + h, x:x + w]
-    roi_color = img[y:y + h, x:x + w]
-    print("looking")
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-    emoji, incl= get_emoji_mood(roi_color,roi_gray)
-
-    dst = apply_emoji(roi_color,emoji, incl)
-    img[y:y + h, x:x + w] = dst
-
-    eyes = eye_cascade.detectMultiScale(roi_gray)
-    eyes_pos = []
-
-    for (ex, ey, ew, eh) in eyes:
-        cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
-        cv2.rectangle(roi_color, (int(ex + ew/2), int(ey + eh/2)), (ex + ew, ey + eh), (0, 255, 0), 2)
-
+    # dst = apply_emoji(roi_color,emoji, incl)
+    # img[y:y + h, x:x + w] = dst
+    #
+    # eyes = eye_cascade.detectMultiScale(roi_gray)
+    # eyes_pos = []
+    #
+    # for (ex, ey, ew, eh) in eyes:
+    #     cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
+    #     cv2.rectangle(roi_color, (int(ex + ew/2), int(ey + eh/2)), (ex + ew, ey + eh), (0, 255, 0), 2)
+#
 
 # Display the output
-emo = emojiList[0]
+# emo = emojiList[0]
 # img = cv2.addWeighted(img,0.7,emo,0.3,0)
-cv2.imshow('img',img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.imshow('img',img)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+# img = cv2.imread('sample/0/Training_33331.jpg')
+
+# get_emotion(img)
+num_emo=2
+list=[]
+inputdir='sample/'+str(num_emo)+'/'
+i=0
+just=[0,0,0,0,0,0,0]
+for fichier in os.listdir(inputdir):
+    print(fichier)
+    img = cv2.imread(inputdir+fichier)
+    if get_emotion(img) == num_emo:
+        just+=1
+    # cv2.imshow('img',img)
+    # cv2.waitKey(0)
+    i+=1
+print(just/i)
 
 # Draw rectangle around the faces
