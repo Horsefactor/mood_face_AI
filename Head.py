@@ -6,10 +6,12 @@ class Head(ABC):
     """
     The Observer interface declares the update method, used by subjects.
     """
-    colors = ['blue','red','green']
+    colors = [(223,32,51),(32,58,223),(0,198,7)]
 
+    @abstractmethod
+    def setColor(self,num) -> None:
 
-
+        pass
 
 
     @abstractmethod
@@ -27,6 +29,7 @@ class Head(ABC):
 class HeadV1(Head):
 
     def __init__(self,x,y,w,h):
+        self.color = 'white'
         self.x = x
         self.y = y
         self.w = w
@@ -47,6 +50,13 @@ class HeadV1(Head):
         self.w = w
         self.h = h
         pass
+
+    def setColor(self, num) -> None:
+        print(Head.colors[num%len(Head.colors)])
+        self.color = Head.colors[num%len(Head.colors)]
+        pass
+
+
 
 
 

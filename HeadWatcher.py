@@ -45,13 +45,14 @@ class HeadWatcherV1(HeadWatcher):
     """
 
     head_list = []
+    valid_heads_counter = 0
 
 
     """
     List of subscribers. In real life, the list of subscribers can be stored
     more comprehensively (categorized by event type, etc.).
     """
-    def __init__(self,positions=[],sensitivity = 300,timeFrame = 5):
+    def __init__(self,positions=[],sensitivity = 70,timeFrame = 5):
         self.positions = positions
         self.sensitivity = sensitivity
         self.timeFrame = timeFrame
@@ -111,6 +112,10 @@ class HeadWatcherV1(HeadWatcher):
                             if head.frames >= self.timeFrame:
                                 print('head validated')
                                 head.valid = True
+                                head.setColor(self.valid_heads_counter)
+                                self.valid_heads_counter+=1
+
+
                     if not stillhereInv:
                         self.detach(head)
                 else:           # if a head is supposed to be valid
@@ -128,5 +133,6 @@ class HeadWatcherV1(HeadWatcher):
                         if head.frames < 0:
                             head.valid = False
                             self.detach(head)
+
 
 

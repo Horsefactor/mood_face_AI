@@ -141,68 +141,68 @@ if __name__ =="__main__":
 
     while True:
 
-        try:
+        # try:
 
-            if time.time() - timerLoop > 1/framerate:
+        if time.time() - timerLoop > 1/framerate:
 
-                timerLoop = time.time()
-                # Read the frame
-                _, img = cap.read()
+            timerLoop = time.time()
+            # Read the frame
+            _, img = cap.read()
 
-                #result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
+            #result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
 
-                # Convert to grayscale
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                # Detect the faces
+            # Convert to grayscale
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # Detect the faces
 
 
-                # Draw the rectangle around each face
+            # Draw the rectangle around each face
 
-                if time.time() - timer0 > faceDetectInterval:
-                    faces = threadFace.facePos
-                    threadFace.img = gray
-                    timer0 = time.time()
-                    watcher.load_position(faces)
-                    watcher.verify()
-
+            if time.time() - timer0 > faceDetectInterval:
                 faces = threadFace.facePos
+                threadFace.img = gray
+                timer0 = time.time()
+                watcher.load_position(faces)
+                watcher.verify()
 
-                for head in watcher.head_list:
-                    if head.valid:
-                        cv2.rectangle(img, (head.x, head.y), (head.x + head.w, head.y + head.h), (255, 0, 0), 2)
-                        cv2.putText(img,
-                                    'Valid',
-                                    (head.x, head.y),
-                                    font, 1,
-                                    (255, 0, 0),
-                                    2,
-                                    cv2.LINE_4)
+            faces = threadFace.facePos
 
-                    else:
-                        cv2.rectangle(img, (head.x, head.y), (head.x + head.w, head.y + head.h), (255, 255, 255), 2)
+            for head in watcher.head_list:
+                if head.valid:
+                    cv2.rectangle(img, (head.x, head.y), (head.x + head.w, head.y + head.h), head.color, 2)
+                    cv2.putText(img,
+                                'Valid',
+                                (head.x, head.y),
+                                font, 1,
+                                head.color,
+                                2,
+                                cv2.LINE_4)
 
-
-                if len(faces)==0:
-                    roi_color=img
-                if time.time() - timer1 > emotionDetectInterval:
-                    #get_emotion(roi_color)
-                    timer1 = time.time()
-
-                # Display
-                #dst = cv2.add(img, a)
-                cv2.imshow('img', img)
-                #print(i)
-                i+=1
+                else:
+                    cv2.rectangle(img, (head.x, head.y), (head.x + head.w, head.y + head.h), (255, 255, 255), 2)
 
 
-            # Stop if q key is pressed
-            if cv2.waitKey(2) & 0xff == ord('q'):
-                break
-        except Exception as e:
-            print("stop")
-            print(e)
-            #threadFace.stop = True
+            if len(faces)==0:
+                roi_color=img
+            if time.time() - timer1 > emotionDetectInterval:
+                #get_emotion(roi_color)
+                timer1 = time.time()
+
+            # Display
+            #dst = cv2.add(img, a)
+            cv2.imshow('img', img)
+            #print(i)
+            i+=1
+
+
+        # Stop if q key is pressed
+        if cv2.waitKey(2) & 0xff == ord('q'):
             break
+    # except Exception as e:
+    #     print("stop")
+    #     print(e)
+    #     threadFace.stop = True
+        # break
 
     # Release the VideoCapture object
     cap.release()
