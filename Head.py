@@ -13,6 +13,10 @@ class Head(ABC):
 
         pass
 
+    @abstractmethod
+    def setEmotion(self, emo) -> None:
+        pass
+
 
     @abstractmethod
     def update(self, headwatcher: HeadWatcher) -> None:
@@ -29,12 +33,17 @@ class Head(ABC):
 class HeadV1(Head):
 
     def __init__(self,x,y,w,h):
+        self.emo = 4
         self.color = 'white'
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.size = w*h
+        self.lastX=x
+        self.lastY=y
+        self.lastW=w
+        self.lastH=h
         self.valid = False
         self.frames = 0
         print("head found")
@@ -44,6 +53,11 @@ class HeadV1(Head):
             print("ConcreteObserverA: Reacted to the event")
 
     def update_pos(self, x,y,w,h) -> None:
+        self.lastX = self.x
+        self.lastY=self.y
+        self.lastW=self.w
+        self.lastH=self.h
+
 
         self.x = x
         self.y = y
@@ -52,10 +66,12 @@ class HeadV1(Head):
         pass
 
     def setColor(self, num) -> None:
-        print(Head.colors[num%len(Head.colors)])
+
         self.color = Head.colors[num%len(Head.colors)]
         pass
 
+    def setEmotion(self, emo) -> None:
+        self.emo = emo
 
 
 

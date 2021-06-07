@@ -10,16 +10,14 @@ eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml
 class ClientThread(threading.Thread):
 
 
-    def __init__(self, img, interval, cap, framerate):
+    def __init__(self, img, interval, framerate):
         self.img = img
         threading.Thread.__init__(self)
         self.facePos = []
         self.interval = interval
         self.timer0 = 0
         self.stop = False
-        self.cap = cap
         self.framerate = framerate
-        self.allFrames = [img]
 
     def run(self):
         print("thread launched")

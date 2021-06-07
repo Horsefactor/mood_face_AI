@@ -46,25 +46,37 @@ class HeadWatcherV1(HeadWatcher):
 
     head_list = []
     valid_heads_counter = 0
+    valid_head_list = []
 
 
     """
     List of subscribers. In real life, the list of subscribers can be stored
     more comprehensively (categorized by event type, etc.).
     """
-    def __init__(self,positions=[],sensitivity = 70,timeFrame = 5):
+    def __init__(self,positions=[],sensitivity = 150,timeFrame = 5):
         self.positions = positions
         self.sensitivity = sensitivity
         self.timeFrame = timeFrame
 
+    def validate(self, head: Head) -> None:
+        print("head validated")
+        head.valid = True
+        head.setColor(self.valid_heads_counter)
+        self.valid_heads_counter += 1
+        self.valid_head_list.append(head)
+
+
+    def unvalidate(self, head: Head) -> None:
+        print("Head unvalidated")
+        self.valid_head_list.remove(head)
 
     def attach(self, head: Head) -> None:
-        print("Subject: Attached an observer.")
+        print("Something Detected")
         self.head_list.append(head)
 
 
     def detach(self, head: Head) -> None:
-        print("Subject: Removed an observer.")
+        print("Head removed")
         self.head_list.remove(head)
 
     """
@@ -93,7 +105,6 @@ class HeadWatcherV1(HeadWatcher):
                     if (x - head.x) ** 2 + (y - head.y) ** 2 < self.sensitivity ** 2:
                         newHead=False
                 if newHead:
-                    print("new head")
                     head = Head.HeadV1(x, y, w, h)
                     self.attach(head)
 
@@ -107,14 +118,9 @@ class HeadWatcherV1(HeadWatcher):
                         if (x - head.x) ** 2 + (y - head.y) ** 2 < self.sensitivity ** 2:
                             head.update_pos(x, y, w, h)
                             head.frames += 1
-                            print(head.frames)
                             stillhereInv= True
                             if head.frames >= self.timeFrame:
-                                print('head validated')
-                                head.valid = True
-                                head.setColor(self.valid_heads_counter)
-                                self.valid_heads_counter+=1
-
+                                self.validate(head)
 
                     if not stillhereInv:
                         self.detach(head)
@@ -128,10 +134,9 @@ class HeadWatcherV1(HeadWatcher):
                             head.frames = self.timeFrame
                     if stillhere == False:
                         head.frames -= 1
-                        print("head leaving?")
-                        print(head.frames)
                         if head.frames < 0:
                             head.valid = False
+                            self.unvalidate(head)
                             self.detach(head)
 
 
